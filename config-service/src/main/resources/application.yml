@@ -1,0 +1,15 @@
+server:
+  port: 8888
+
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+#          uri: file:///workspace/config
+          uri: https://github.com/jongmin4943/ecommerce-msa-config.git
+#          username:
+#          password:
