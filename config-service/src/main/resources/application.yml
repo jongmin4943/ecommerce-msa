@@ -5,6 +5,11 @@ server:
 spring:
   application:
     name: config-server
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
   cloud:
     config:
       server:
@@ -13,3 +18,8 @@ spring:
           uri: https://github.com/jongmin4943/ecommerce-msa-config.git
 #          username:
 #          password:
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, busrefresh
