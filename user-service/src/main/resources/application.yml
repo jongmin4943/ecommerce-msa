@@ -38,7 +38,7 @@ greeting:
 
 logging:
   level:
-    org.min.userserivce: debug
+    org.min.userserivce.client: debug
 
 management:
   endpoints:
