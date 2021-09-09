@@ -2,6 +2,7 @@ package org.min.orderservice.controller;
 
 import org.min.orderservice.dto.OrderDto;
 import org.min.orderservice.jpa.OrderEntity;
+import org.min.orderservice.messagequeue.KafkaProducer;
 import org.min.orderservice.service.OrderService;
 import org.min.orderservice.vo.RequestOrder;
 import org.min.orderservice.vo.ResponseOrder;
@@ -20,11 +21,14 @@ import java.util.List;
 public class OrderController {
     private final Environment env;
     private final OrderService orderService;
+    private final KafkaProducer kafkaProducer;
 
-    public OrderController(Environment env, OrderService orderService) {
+    public OrderController(Environment env, OrderService orderService, KafkaProducer kafkaProducer) {
         this.env = env;
         this.orderService = orderService;
+        this.kafkaProducer = kafkaProducer;
     }
+
     @GetMapping("/health_check")
     public String status() {
         return String.format("It's working on User-Service on Port %s",env.getProperty("local.server.port"));
@@ -37,9 +41,15 @@ public class OrderController {
         OrderDto orderDto = mapper.map(order,OrderDto.class);
         orderDto.setUserId(userId);
         OrderDto createdOrder = orderService.createOrder(orderDto);
+
         ResponseOrder responseOrder = mapper.map(createdOrder, ResponseOrder.class);
+
+        /*send this order to the kafka*/
+        kafkaProducer.send("example-catalog-topic",orderDto);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(responseOrder);
     }
+
     @GetMapping("/{userId}/orders")
     public ResponseEntity<List<ResponseOrder>> getOrder(@PathVariable String userId) {
         Iterable<OrderEntity> orderList = orderService.getOrdersByUserId(userId);
