@@ -9,6 +9,8 @@ import org.min.userservice.jpa.UserRepository;
 import org.min.userservice.vo.ResponseOrder;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
@@ -34,12 +36,15 @@ public class UserServiceImpl implements UserService{
     private final RestTemplate restTemplate;
     private final OrderServiceClient orderServiceClient;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, Environment env, RestTemplate restTemplate, OrderServiceClient orderServiceClient) {
+    private final CircuitBreakerFactory circuitBreakerFactory;
+
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, Environment env, RestTemplate restTemplate, OrderServiceClient orderServiceClient, CircuitBreakerFactory circuitBreakerFactory) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.env = env;
         this.restTemplate = restTemplate;
         this.orderServiceClient = orderServiceClient;
+        this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
     @Override
@@ -79,7 +84,13 @@ public class UserServiceImpl implements UserService{
 //        }
 
         /*ErrorDecoder*/
-        List<ResponseOrder> orderList = orderServiceClient.getOrders(userId);
+//        List<ResponseOrder> orderList = orderServiceClient.getOrders(userId);
+
+        log.info("Before call orders microservice");
+        CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitbreaker");
+        List<ResponseOrder> orderList = circuitBreaker.run(() -> orderServiceClient.getOrders(userId),throwable -> new ArrayList<>());
+        log.info("After call orders microservice");
+
         userDto.setOrders(orderList);
         return userDto;
     }
