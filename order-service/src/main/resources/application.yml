@@ -36,3 +36,9 @@ eureka:
 logging:
   level:
     org.min.orderserivce: debug
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, beans, httptrace, busrefresh, info, metrics, prometheus

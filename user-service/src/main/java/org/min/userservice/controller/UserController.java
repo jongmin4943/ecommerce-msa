@@ -1,5 +1,6 @@
 package org.min.userservice.controller;
 
+import io.micrometer.core.annotation.Timed;
 import org.min.userservice.dto.UserDto;
 import org.min.userservice.jpa.UserEntity;
 import org.min.userservice.service.UserService;
@@ -33,6 +34,7 @@ public class UserController {
     }
 
     @GetMapping("/health_check")
+    @Timed(value = "users.status", longTask = true)
     public String status() {
         StringBuilder builder = new StringBuilder();
         builder.append("It's working on User-Service port(local.server.port)= ")
@@ -47,6 +49,7 @@ public class UserController {
     }
 
     @GetMapping("/welcome")
+    @Timed(value = "users.welcome", longTask = true)
     public String welcome() {
 //        return env.getProperty("greeting.message");
         return greeting.getMessage();
