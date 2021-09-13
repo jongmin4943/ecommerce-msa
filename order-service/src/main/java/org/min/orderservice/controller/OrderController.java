@@ -74,12 +74,12 @@ public class OrderController {
         });
 
         /*강제 오류 발생*/
-        try {
-            Thread.sleep(1000);
-            throw new RuntimeException("장애 발생");
-        }catch (InterruptedException ex){
-            log.error(ex.getMessage());
-        }
+//        try {
+//            Thread.sleep(1000);
+//            throw new RuntimeException("장애 발생");
+//        }catch (InterruptedException ex){
+//            log.error(ex.getMessage());
+//        }
 
         log.info("after retrieve orders microservice");
         return ResponseEntity.status(HttpStatus.OK).body(result);
